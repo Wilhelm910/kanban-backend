@@ -17,3 +17,7 @@ class Task(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="todo")
     def __str__(self):
         return f'({self.id}) {self.title}'
+    
+
+
+    

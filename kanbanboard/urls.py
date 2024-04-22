@@ -17,10 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from board.views import LoginView, TaskView
+from board.views import CreateTaskView, LoginView, TaskView, UserListView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', LoginView.as_view()),
     path('board/', TaskView.as_view()),
+    path('createTask/', CreateTaskView.as_view()),
+    path('userlist/', UserListView.as_view()),
 ]
