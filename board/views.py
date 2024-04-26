@@ -8,6 +8,7 @@ from board.serializers import TaskSerializer, UserSerializer
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
+from django.http import Http404
 
 
 
@@ -29,6 +30,25 @@ class CreateTaskView(APIView):
             serializer.save()
             return Response(serializer.data, status=201) 
         return Response(serializer.errors, status=400) 
+    
+    
+class UpdateTaskView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self, pk):
+        try:
+            return Task.objects.get(pk=pk)
+        except Task.DoesNotExist:
+            raise Http404
+
+    def put(self, request, pk, format=None):
+        task = self.get_object(pk)
+        serializer = TaskSerializer(task, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
 
 
 class LoginView(ObtainAuthToken):
