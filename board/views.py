@@ -71,3 +71,10 @@ class UserListView(APIView):
         users = User.objects.all()
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
+    
+class CurrentUserView(APIView): 
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    def get(self,request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
