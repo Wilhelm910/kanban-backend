@@ -3,8 +3,8 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from board.models import Task
-from board.serializers import TaskSerializer, UserSerializer
+from board.models import Task, Board
+from board.serializers import TaskSerializer, UserSerializer, BoardSerializer
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
@@ -78,3 +78,25 @@ class CurrentUserView(APIView):
     def get(self,request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
+
+class BoardView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk, format=None):
+        try:
+            board = Board.objects.get(pk=pk)
+        except Board.DoesNotExist:
+            return Response({'error': 'Board not found'}, status=404)
+
+        serializer = BoardSerializer(board)
+        return Response(serializer.data)
+    
+class AllBoardsView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        board = Board.objects.all()
+        serializer = BoardSerializer(board, many=True)
+        return Response(serializer.data)
+    

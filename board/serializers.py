@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Task
+from .models import Board, Task
 from django.contrib.auth.models import User
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -27,3 +27,10 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = '__all__'
+        
+class BoardSerializer(serializers.ModelSerializer):
+    tasks = TaskSerializer(many=True, read_only=True)
+    class Meta:
+        model = Board
+        fields = "__all__"
+        
