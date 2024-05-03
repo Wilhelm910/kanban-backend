@@ -6,9 +6,10 @@ from rest_framework.views import APIView
 from board.models import Task, Board
 from board.serializers import TaskSerializer, UserSerializer, BoardSerializer
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth.models import User
 from django.http import Http404
+from rest_framework import status
 
 
 
@@ -100,3 +101,29 @@ class AllBoardsView(APIView):
         serializer = BoardSerializer(board, many=True)
         return Response(serializer.data)
     
+
+
+class CreateBoardView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    def post(self,request,format=None):
+        serializer = BoardSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201) 
+        return Response(serializer.errors, status=400) 
+    
+    
+class CreateUserView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, format=None):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            if user:
+                token = Token.objects.create(user=user)
+                json = serializer.data
+                json['token'] = token.key
+                return Response(json, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
