@@ -50,6 +50,11 @@ class UpdateTaskView(APIView):
             serializer.save()
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
+    
+    def delete(self, request, pk, format=None):
+        task = self.get_object(pk)
+        task.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class LoginView(ObtainAuthToken):
