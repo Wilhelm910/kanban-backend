@@ -83,6 +83,59 @@ class UpdateTaskView(APIView):
         task.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+class UserView(APIView):
+    authentication_classes = [TokenAuthentication]
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+    def get(self, request, pk=None):
+        if pk == 'current':
+            serializer = UserSerializer(request.user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        elif pk is None:
+            users = User.objects.all()
+            serializer = UserSerializer(users, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            try:
+                user = User.objects.get(pk=pk)
+            except User.DoesNotExist:
+                return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+            serializer = UserSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            token = Token.objects.create(user=user)
+            json = serializer.data
+            json['token'] = token.key
+            return Response(json, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class BoardDetailView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk, format=None):
+        try:
+            board = Board.objects.get(pk=pk)
+        except Board.DoesNotExist:
+            return Response({'error': 'Board not found'}, status=404)
+
+        serializer = BoardSerializer(board)
+        return Response(serializer.data)
+
+
+
+
+
+
+
 
 # class TaskView(APIView):
 #     authentication_classes = [TokenAuthentication]
@@ -127,80 +180,36 @@ class UpdateTaskView(APIView):
 
 
 
-class BoardDetailView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
 
-    def get(self, request, pk, format=None):
-        try:
-            board = Board.objects.get(pk=pk)
-        except Board.DoesNotExist:
-            return Response({'error': 'Board not found'}, status=404)
-
-        serializer = BoardSerializer(board)
-        return Response(serializer.data)
     
-class UserListView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-    def get(self, request):
-        users = User.objects.all()
-        serializer = UserSerializer(users, many=True)
-        return Response(serializer.data)
-    
-class CurrentUserView(APIView): 
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-    def get(self,request):
-        serializer = UserSerializer(request.user)
-        return Response(serializer.data)
-    
-    
-class CreateUserView(APIView):
-    permission_classes = [AllowAny]
-
-    def post(self, request, format=None):
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            if user:
-                token = Token.objects.create(user=user)
-                json = serializer.data
-                json['token'] = token.key
-                return Response(json, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    
-# class UserView(APIView):
+# class UserListView(APIView):
 #     authentication_classes = [TokenAuthentication]
+#     permission_classes = [IsAuthenticated]
+#     def get(self, request):
+#         users = User.objects.all()
+#         serializer = UserSerializer(users, many=True)
+#         return Response(serializer.data)
+    
+# class CurrentUserView(APIView): 
+#     authentication_classes = [TokenAuthentication]
+#     permission_classes = [IsAuthenticated]
+#     def get(self,request):
+#         serializer = UserSerializer(request.user)
+#         return Response(serializer.data)
+    
+    
+# class CreateUserView(APIView):
+#     permission_classes = [AllowAny]
 
-#     def get_permissions(self):
-#         if self.request.method == 'POST':
-#             return [AllowAny()]
-#         return [IsAuthenticated()]
-
-#     def get(self, request, pk=None):
-#         if pk == 'current':
-#             serializer = UserSerializer(request.user)
-#             return Response(serializer.data, status=status.HTTP_200_OK)
-#         if pk is None:
-#             users = User.objects.all()
-#             serializer = UserSerializer(users, many=True)
-#             return Response(serializer.data, status=status.HTTP_200_OK)
-#         else:
-#             try:
-#                 user = User.objects.get(pk=pk)
-#             except User.DoesNotExist:
-#                 return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
-#             serializer = UserSerializer(user)
-#             return Response(serializer.data, status=status.HTTP_200_OK)
-
-#     def post(self, request):
+#     def post(self, request, format=None):
 #         serializer = UserSerializer(data=request.data)
 #         if serializer.is_valid():
 #             user = serializer.save()
-#             token = Token.objects.create(user=user)
-#             json = serializer.data
-#             json['token'] = token.key
-#             return Response(json, status=status.HTTP_201_CREATED)
+#             if user:
+#                 token = Token.objects.create(user=user)
+#                 json = serializer.data
+#                 json['token'] = token.key
+#                 return Response(json, status=status.HTTP_201_CREATED)
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    

@@ -17,28 +17,24 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from board.views import BoardDetailView, BoardView, CreateUserView, CurrentUserView, LoginView, TaskView, UpdateTaskView, UserListView
+from board.views import BoardDetailView, BoardView, LoginView, TaskView, UpdateTaskView, UserView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', LoginView.as_view()),
-    # path('board/', TaskView.as_view()),
-    # path('createTask/', CreateTaskView.as_view()),
-    
-    # path('createBoard/', CreateBoardView.as_view()),
-    path('createUser/', CreateUserView.as_view()),
-    path('userlist/', UserListView.as_view()),
-    path('updateTask/<int:pk>/', UpdateTaskView.as_view()),
-    path('getCurrentUser/', CurrentUserView.as_view()),
-  
-    # path('allboard/', AllBoardsView.as_view()),
-    
     path('tasks/', TaskView.as_view()),
     path('boards/', BoardView.as_view()),
     path('board/<int:pk>/', BoardDetailView.as_view()),
+    path('users/current/', UserView.as_view(), {'pk': 'current'}),
+    path('users/', UserView.as_view(), name='user-list-create'),
+    path('updateTask/<int:pk>/', UpdateTaskView.as_view()),
     
-    
-    #  path('users/', UserView.as_view(), name='user-list-create'),
+    # path('board/', TaskView.as_view()),
+    # path('createTask/', CreateTaskView.as_view()),
+    # path('createBoard/', CreateBoardView.as_view()),
+    # path('createUser/', CreateUserView.as_view()),
+    # path('userlist/', UserListView.as_view()),
+    # path('getCurrentUser/', CurrentUserView.as_view()),
+    # path('allboard/', AllBoardsView.as_view()),
     # path('users/<int:pk>/', UserView.as_view(), name='user-detail'),
-    # path('users/current/', UserView.as_view(), {'pk': 'current'}, name='current-user'),
 ]
